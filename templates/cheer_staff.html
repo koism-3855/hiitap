@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}スタッフを選ぶ — HiiTap{% endblock %}
+{% block extra_css %}
+<style>
+.swipe-hint{text-align:center;color:var(--ink-light);font-size:.82rem;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:6px;}
+.swipe-icon{font-size:1.4rem;animation:sway 2s ease-in-out infinite;}
+@keyframes sway{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.staff-swipe-container{position:relative;height:460px;margin:0 auto;max-width:340px;}
+.staff-swipe-card{position:absolute;inset:0;background:white;border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(30,42,74,.15);display:none;flex-direction:column;}
+.staff-swipe-card.current{display:flex;}
+.staff-swipe-card img{width:100%;height:300px;object-fit:cover;}
+.staff-swipe-info{padding:20px;flex:1;}
+.staff-swipe-name{font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;}
+.staff-swipe-store{font-size:.82rem;color:var(--ink-light);margin-top:3px;}
+.nav-dots{display:flex;justify-content:center;gap:6px;margin:16px 0;}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;}
+.nav-dot.active{background:var(--brand);transform:scale(1.3);}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div style="text-align:center;margin-bottom:20px">
+    <div class="step-indicator"><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    <h2 style="font-weight:800;font-size:1.3rem">担当してくれたのは誰ですか？</h2>
+    <p style="font-size:.85rem;color:var(--ink-light);margin-top:4px">{{ store.name }} にて</p>
+  </div>
+  {% if store.staff %}
+  <div class="swipe-hint"><span class="swipe-icon">👆</span> ← → をタップしてスタッフを切り替えてください</div>
+  <div class="staff-swipe-container" id="staffContainer">
+    {% for s in store.staff %}
+    <div class="staff-swipe-card {% if loop.first %}current{% endif %}" data-idx="{{ loop.index0 }}">
+      <img src="{{ s.photo_url }}" alt="{{ s.name }}">
+      <div class="staff-swipe-info">
+        <div class="staff-swipe-name">{{ s.name }}</div>
+        <div class="staff-swipe-store">📍 {{ store.name }}</div>
+        {% if s.bio %}<div style="font-size:.85rem;color:var(--ink-light);margin-top:8px;line-height:1.6">{{ s.bio }}</div>{% endif %}
+        <div style="margin-top:12px;font-size:.78rem;color:var(--ink-light)">{{ s.total_points() }} ポイント獲得
+          {% if s.avg_service_rating() > 0 %} · <span style="color:var(--brand)">{{ '★' * s.avg_service_rating()|int }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="nav-dots" id="navDots">
+    {% for s in store.staff %}
+    <div class="nav-dot {% if loop.first %}active{% endif %}" onclick="goTo({{ loop.index0 }})"></div>
+    {% endfor %}
+  </div>
+  <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px">
+    <button onclick="prevStaff()" class="btn btn-ghost">←</button>
+    <button onclick="nextStaff()" class="btn btn-ghost">→</button>
+  </div>
+  <form method="POST" id="staffForm">
+    <input type="hidden" name="staff_id" id="staffIdInput" value="{{ store.staff[0].id }}">
+    <button type="submit" class="btn btn-primary btn-full" style="font-size:1rem;padding:16px">♥ この人に感謝を送る</button>
+  </form>
+  {% else %}
+  <div class="card card-body" style="text-align:center;padding:40px"><p>スタッフが登録されていません。</p></div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const staff = {{ store.staff | map(attribute='id') | list | tojson }};
+let current = 0;
+function goTo(idx){
+  document.querySelectorAll('.staff-swipe-card').forEach(c=>c.classList.remove('current'));
+  document.querySelectorAll('.nav-dot').forEach(d=>d.classList.remove('active'));
+  document.querySelectorAll('.staff-swipe-card')[idx].classList.add('current');
+  document.querySelectorAll('.nav-dot')[idx].classList.add('active');
+  document.getElementById('staffIdInput').value = staff[idx];
+  current = idx;
+}
+function nextStaff(){goTo((current+1)%staff.length);}
+function prevStaff(){goTo((current-1+staff.length)%staff.length);}
+let sx=0;
+document.getElementById('staffContainer').addEventListener('touchstart',e=>sx=e.touches[0].clientX);
+document.getElementById('staffContainer').addEventListener('touchend',e=>{const d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>40)d>0?nextStaff():prevStaff();});
+</script>
+{% endblock %}

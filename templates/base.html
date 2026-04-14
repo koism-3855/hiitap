@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}HiiTap{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#E07050;--brand-dark:#C05030;--brand-light:#FFF0EB;--ink:#1E2A4A;--ink-light:#5A6480;--surface:#FAFAF8;--card:#FFFFFF;--border:#EDE8E4;--success:#2E7D52;--error:#C0392B;--shadow-sm:0 2px 8px rgba(30,42,74,.07);--shadow-md:0 6px 24px rgba(30,42,74,.10);--shadow-lg:0 16px 48px rgba(30,42,74,.14);--radius:16px;--radius-sm:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh;padding-bottom:80px;}
+h1,h2,h3,h4{font-family:'Sora',sans-serif;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px;}
+.nav-logo{font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;color:var(--brand);text-decoration:none;display:flex;align-items:center;gap:6px;}
+.nav-logo span{color:var(--ink);}
+.nav-actions{display:flex;gap:8px;align-items:center;}
+.nav-link{font-size:.85rem;font-weight:500;color:var(--ink-light);text-decoration:none;padding:6px 14px;border-radius:99px;transition:all .2s;}
+.nav-link:hover,.nav-link.active{background:var(--brand-light);color:var(--brand);}
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:var(--brand);color:white;font-family:'Sora',sans-serif;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));}
+.bottom-nav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.65rem;font-weight:600;color:var(--ink-light);text-decoration:none;padding:4px 12px;border-radius:10px;transition:all .2s;font-family:'Sora',sans-serif;}
+.bottom-nav a.active,.bottom-nav a:hover{color:var(--brand);}
+.bottom-nav a svg{width:22px;height:22px;}
+.page{max-width:680px;margin:0 auto;padding:76px 16px 16px;}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;}
+.card-body{padding:20px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Sora',sans-serif;font-weight:600;font-size:.9rem;padding:12px 24px;border-radius:99px;border:none;cursor:pointer;transition:all .22s;text-decoration:none;white-space:nowrap;}
+.btn-primary{background:var(--brand);color:white;}
+.btn-primary:hover{background:var(--brand-dark);transform:translateY(-1px);box-shadow:var(--shadow-md);}
+.btn-ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand);}
+.btn-ghost:hover{background:var(--brand-light);}
+.btn-sm{padding:8px 18px;font-size:.82rem;}
+.btn-full{width:100%;}
+.input-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.input-group label{font-size:.82rem;font-weight:600;color:var(--ink-light);font-family:'Sora',sans-serif;}
+.input-group input,.input-group textarea,.input-group select{padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--ink);background:var(--card);transition:border .2s;outline:none;}
+.input-group input:focus,.input-group textarea:focus{border-color:var(--brand);}
+.flash-wrap{padding:0 16px;margin-top:68px;}
+.flash{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-sm);font-size:.88rem;font-weight:500;margin-bottom:8px;}
+.flash.success{background:#E8F5EE;color:var(--success);border:1px solid #B7DFC9;}
+.flash.error{background:#FDECEA;color:var(--error);border:1px solid #F5C0BB;}
+.rank-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:700;font-family:'Sora',sans-serif;}
+.rank-bronze{background:#FFF0D6;color:#9E6A00;}
+.rank-silver{background:#EDF2F7;color:#5A6E80;}
+.rank-gold{background:#FFFBE6;color:#B8860B;}
+.rank-platinum{background:#F3EEFF;color:#6B3FA0;}
+.progress-bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--brand);border-radius:99px;transition:width .4s;}
+.cheer-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);}
+.cheer-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.cheer-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--brand-light);}
+.cheer-meta{flex:1;}
+.cheer-name{font-family:'Sora',sans-serif;font-weight:700;font-size:.92rem;}
+.cheer-sub{font-size:.78rem;color:var(--ink-light);}
+.cheer-stars{color:var(--brand);font-size:.85rem;}
+.cheer-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tag{background:var(--brand-light);color:var(--brand);padding:3px 10px;border-radius:99px;font-size:.72rem;font-weight:600;font-family:'Sora',sans-serif;}
+.step-indicator{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:24px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s;}
+.step-dot.active{background:var(--brand);transform:scale(1.3);}
+.step-dot.done{background:var(--brand);opacity:.4;}
+.section-header{margin-bottom:16px;}
+.section-header h2{font-family:'Sora',sans-serif;font-weight:700;font-size:1.2rem;}
+.section-header p{font-size:.85rem;color:var(--ink-light);margin-top:3px;}
+.store-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-sm);text-decoration:none;color:inherit;margin-bottom:10px;transition:all .2s;}
+.store-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.store-icon{width:52px;height:52px;border-radius:14px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+.store-info{flex:1;}
+.store-name{font-family:'Sora',sans-serif;font-weight:700;font-size:.95rem;}
+.store-addr{font-size:.78rem;color:var(--ink-light);margin-top:2px;}
+.store-badge{background:#E8F5EE;color:var(--success);font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;font-family:'Sora',sans-serif;}
+@media(min-width:600px){.bottom-nav{display:none;}}
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+<nav class="nav">
+  <a href="{{ url_for('home') }}" class="nav-logo">♥ Hii<span>Tap</span></a>
+  {% if current_user.is_authenticated %}
+  <div class="nav-actions">
+    <a href="{{ url_for('home') }}" class="nav-link {% if request.endpoint=='home' %}active{% endif %}">フィード</a>
+    <a href="{{ url_for('search') }}" class="nav-link {% if request.endpoint=='search' %}active{% endif %}">検索</a>
+    <a href="{{ url_for('my_list') }}" class="nav-link {% if request.endpoint=='my_list' %}active{% endif %}">リスト</a>
+    <a href="{{ url_for('mypage') }}" class="nav-avatar">{{ current_user.display_name[0].upper() }}</a>
+  </div>
+  {% else %}
+  <div class="nav-actions">
+    <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">ログイン</a>
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">新規登録</a>
+  </div>
+  {% endif %}
+</nav>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}<div class="flash-wrap">{% for cat,msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}</div>{% endif %}
+{% endwith %}
+{% block content %}{% endblock %}
+{% if current_user.is_authenticated %}
+<nav class="bottom-nav">
+  <a href="{{ url_for('home') }}" class="{% if request.endpoint=='home' %}active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="{% if request.endpoint=='home' %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>フィード
+  </a>
+  <a href="{{ url_for('search') }}" class="{% if request.endpoint=='search' %}active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>検索
+  </a>
+  <a href="{{ url_for('my_list') }}" class="{% if request.endpoint=='my_list' %}active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="{% if request.endpoint=='my_list' %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>リスト
+  </a>
+  <a href="{{ url_for('mypage') }}" class="{% if request.endpoint=='mypage' %}active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="{% if request.endpoint=='mypage' %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>マイページ
+  </a>
+</nav>
+{% endif %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

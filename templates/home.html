@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Feed — HiiTap{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+    <div><h2>コミュニティフィード 🎉</h2><p>今リアルタイムで感謝されているスタッフを見る</p></div>
+    <a href="{{ url_for('search') }}" class="btn btn-primary btn-sm">+ チアを送る</a>
+  </div>
+  {% if not cheers %}
+  <div class="card" style="text-align:center;padding:48px 20px">
+    <div style="font-size:3rem;margin-bottom:12px">💌</div>
+    <h3 style="margin-bottom:8px">まだチアがありません</h3>
+    <p style="color:var(--ink-light);font-size:.9rem;margin-bottom:20px">素晴らしいサービスに最初に感謝しよう！</p>
+    <a href="{{ url_for('search') }}" class="btn btn-primary">お店を探す</a>
+  </div>
+  {% endif %}
+  {% for cheer in cheers %}
+  <div class="cheer-card">
+    <div class="cheer-header">
+      <img src="{{ cheer.staff.photo_url }}" class="cheer-avatar" alt="{{ cheer.staff.name }}">
+      <div class="cheer-meta">
+        <div class="cheer-name">{{ cheer.staff.name }}</div>
+        <div class="cheer-sub">
+          <a href="{{ url_for('store_detail', store_id=cheer.store_id) }}" style="color:var(--brand);text-decoration:none;font-weight:600">{{ cheer.store.name }}</a>
+          · {{ cheer.created_at.strftime('%b %d') }}
+        </div>
+        <div class="cheer-stars">{{ '★' * cheer.service_rating }}{{ '☆' * (5 - cheer.service_rating) }}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:.75rem;color:var(--ink-light)">送信者</div>
+        <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:.85rem">{{ cheer.user.display_name }}</div>
+      </div>
+    </div>
+    {% if cheer.good_points_list() %}
+    <div class="cheer-tags">{% for pt in cheer.good_points_list() %}<span class="tag">{{ pt }}</span>{% endfor %}</div>
+    {% endif %}
+    {% if cheer.comment %}<div style="margin-top:10px;font-size:.88rem;color:var(--ink-light);font-style:italic">"{{ cheer.comment }}"</div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

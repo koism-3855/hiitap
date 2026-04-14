@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}検索 — HiiTap{% endblock %}
+{% block extra_css %}
+<style>
+.search-hero{background:linear-gradient(135deg,var(--brand),#C05030);border-radius:var(--radius);padding:24px 20px;margin-bottom:20px;color:white;}
+.search-hero h2{font-weight:800;font-size:1.3rem;margin-bottom:12px;}
+.search-row{display:flex;gap:8px;}
+.search-input{flex:1;padding:12px 16px;border:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;}
+.search-btn{background:var(--ink);color:white;border:none;border-radius:99px;padding:12px 20px;font-family:'Sora',sans-serif;font-weight:600;cursor:pointer;}
+.cat-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+.cat-chips::-webkit-scrollbar{display:none;}
+.cat-chip{background:var(--card);border:1.5px solid var(--border);border-radius:99px;padding:6px 16px;font-size:.8rem;font-weight:600;font-family:'Sora',sans-serif;color:var(--ink-light);white-space:nowrap;cursor:pointer;text-decoration:none;transition:all .2s;}
+.cat-chip:hover,.cat-chip.active{background:var(--brand-light);color:var(--brand);border-color:var(--brand);}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="search-hero">
+    <h2>素晴らしいサービスを見つけよう ♥</h2>
+    <form method="GET" action="{{ url_for('search') }}">
+      <div class="search-row">
+        <input type="text" name="q" value="{{ query }}" placeholder="お店を検索…" class="search-input">
+        <button type="submit" class="search-btn">検索</button>
+      </div>
+    </form>
+  </div>
+  <div class="cat-chips">
+    <a href="{{ url_for('search') }}" class="cat-chip {% if not category %}active{% endif %}">すべて</a>
+    {% for cat in categories %}
+    <a href="{{ url_for('search', category=cat) }}" class="cat-chip {% if category==cat %}active{% endif %}">
+      {% if cat=='Cafe' %}☕ カフェ{% elif cat=='Restaurant' %}🍽 レストラン{% elif cat=='Retail' %}🛍 ショッピング{% elif cat=='Bar' %}🍸 バー{% elif cat=='Hotel' %}🏨 ホテル{% else %}📍 {{ cat }}{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% if stores %}
+  <div class="section-header"><h2>{{ stores|length }} 件のお店</h2></div>
+  {% for store in stores %}
+  <a href="{{ url_for('store_detail', store_id=store.id) }}" class="store-card">
+    <div class="store-icon">{% if store.category=='Cafe' %}☕{% elif store.category=='Restaurant' %}🍽{% elif store.category=='Retail' %}🛍{% elif store.category=='Bar' %}🍸{% else %}🏪{% endif %}</div>
+    <div class="store-info">
+      <div class="store-name">{{ store.name }}</div>
+      <div class="store-addr">📍 {{ store.address }}</div>
+      <div style="margin-top:6px">
+        {% if store.is_affiliated %}<span class="store-badge">✓ HiiTapパートナー</span>{% endif %}
+        <span style="font-size:.75rem;color:var(--ink-light);margin-left:6px">スタッフ {{ store.staff|length }} 名</span>
+      </div>
+    </div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" style="flex-shrink:0;color:var(--ink-light)"><path d="m9 18 6-6-6-6"/></svg>
+  </a>
+  {% endfor %}
+  {% elif query or category %}
+  <div class="card" style="text-align:center;padding:40px 20px">
+    <div style="font-size:2.5rem;margin-bottom:12px">🔍</div>
+    <h3 style="margin-bottom:8px">お店が見つかりませんでした</h3>
+    <p style="color:var(--ink-light);font-size:.88rem">別の名前またはカテゴリで試してください</p>
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;padding:40px 20px">
+    <div style="font-size:2.5rem;margin-bottom:12px">🏪</div>
+    <h3 style="margin-bottom:8px">お店を検索</h3>
+    <p style="color:var(--ink-light);font-size:.88rem">店名を入力するかカテゴリを選択してください</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ store.name }} — HiiTap{% endblock %}
+{% block extra_css %}
+<style>
+.store-hero{background:linear-gradient(135deg,var(--ink),#2A3A6A);border-radius:var(--radius);padding:28px 20px;margin-bottom:20px;color:white;}
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.staff-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block;}
+.staff-item:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.staff-item img{width:100%;aspect-ratio:1;object-fit:cover;}
+.staff-item-info{padding:10px 8px;}
+.staff-item-name{font-family:'Sora',sans-serif;font-weight:700;font-size:.85rem;}
+.staff-item-pts{font-size:.75rem;color:var(--brand);font-weight:600;}
+.qr-section{background:var(--brand-light);border:1.5px dashed var(--brand);border-radius:var(--radius);padding:20px;text-align:center;margin-top:20px;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <a href="{{ url_for('search') }}" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-light);font-size:.85rem;text-decoration:none;margin-bottom:16px;font-weight:500">← 戻る</a>
+  <div class="store-hero">
+    <div style="font-size:3rem;margin-bottom:10px">{% if store.category=='Cafe' %}☕{% elif store.category=='Restaurant' %}🍽{% elif store.category=='Retail' %}🛍{% elif store.category=='Bar' %}🍸{% else %}🏪{% endif %}</div>
+    <h1 style="font-weight:800;font-size:1.6rem">{{ store.name }}</h1>
+    <div style="font-size:.85rem;opacity:.75;margin-top:4px">📍 {{ store.address }}</div>
+    {% if store.is_affiliated %}<div style="margin-top:8px;display:inline-block;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:99px;font-size:.75rem;font-weight:700">✓ HiiTapパートナー</div>{% endif %}
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <a href="{{ url_for('cheer_staff', store_id=store.id) }}" class="btn btn-primary">♥ 感謝を送る</a>
+      {% if in_list %}
+      <form method="POST" action="{{ url_for('list_remove', item_id=in_list.id) }}" style="display:inline">
+        <button class="btn" style="background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.4);color:white">★ 保存済み</button>
+      </form>
+      {% else %}
+      <button onclick="document.getElementById('list-modal').style.display='flex'" class="btn" style="background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.4);color:white">☆ 保存</button>
+      {% endif %}
+    </div>
+  </div>
+  {% if store.description %}<div class="card card-body" style="margin-bottom:20px"><p style="font-size:.9rem;color:var(--ink-light);line-height:1.7">{{ store.description }}</p></div>{% endif %}
+  {% if store.staff %}
+  <div class="section-header"><h2>スタッフ紹介</h2><p>スタッフをタップして感謝を送ろう</p></div>
+  <div class="staff-grid">
+    {% for s in store.staff %}
+    <a href="{{ url_for('cheer_staff', store_id=store.id) }}" class="staff-item">
+      <img src="{{ s.photo_url }}" alt="{{ s.name }}">
+      <div class="staff-item-info">
+        <div class="staff-item-name">{{ s.name }}</div>
+        <div class="staff-item-pts">{{ s.total_points() }} ポイント獲得</div>
+        {% if s.avg_service_rating() > 0 %}<div style="color:var(--brand);font-size:.75rem">{{ '★' * s.avg_service_rating()|int }}</div>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="qr-section">
+    <h3 style="font-weight:700;margin-bottom:12px;color:var(--brand)">📱 QRコード</h3>
+    <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR" style="width:140px;height:140px;border-radius:12px">
+    <p style="font-size:.8rem;color:var(--ink-light);margin-top:10px">スキャンしてこのお店のHiiTapページへ</p>
+  </div>
+</div>
+<div id="list-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center">
+  <div style="background:white;border-radius:24px 24px 0 0;padding:28px 24px;width:100%;max-width:500px">
+    <h3 style="margin-bottom:16px">マイリストに保存</h3>
+    <form method="POST" action="{{ url_for('list_add', store_id=store.id) }}">
+      <div class="input-group"><label>タグ（カンマ区切り）</label><input type="text" name="tags" placeholder="例：デート、ランチ"></div>
+      <div class="input-group"><label>メモ</label><textarea name="memo" rows="2" placeholder="感想など…"></textarea></div>
+      <div style="display:flex;gap:10px">
+        <button type="button" onclick="document.getElementById('list-modal').style.display='none'" class="btn btn-ghost btn-full">キャンセル</button>
+        <button type="submit" class="btn btn-primary btn-full">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
