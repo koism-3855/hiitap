@@ -700,10 +700,13 @@ def list_remove(item_id):
 @app.route("/health")
 def health():
     key = get_gmaps_key()
+    # Renderが渡している環境変数名一覧（値は非表示）
+    env_keys = [k for k in os.environ.keys() if "GOOGLE" in k or "MAPS" in k or "API" in k]
     return jsonify({
         "status": "ok",
         "gmaps_key_set": bool(key),
-        "gmaps_key_preview": (key[:8] + "...") if key else None
+        "gmaps_key_preview": (key[:8] + "...") if key else None,
+        "related_env_vars": env_keys
     })
 
 
