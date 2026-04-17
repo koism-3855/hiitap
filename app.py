@@ -259,7 +259,7 @@ def place_result_to_dict(p):
 def _cache_get_or_fetch(cache_key_raw, fetch_fn):
     """汎用キャッシュ取得。キャッシュミス時は fetch_fn() を呼ぶ。"""
     key    = SearchCache.make_key(cache_key_raw)
-    cached = SearchCache.query.filter_by(cache_key=key).first()
+    cached = db.session.query(SearchCache).filter_by(cache_key=key).first()
 
     if cached and cached.is_valid():
         return json.loads(cached.results)
@@ -331,7 +331,7 @@ def get_or_create_store(place_id):
 
 def purge_expired_cache():
     """期限切れのキャッシュを削除する（定期呼び出し用）。"""
-    deleted = (SearchCache.query
+    deleted = (db.session.query(SearchCache)
                .filter(SearchCache.expires_at < datetime.utcnow())
                .delete())
     db.session.commit()
