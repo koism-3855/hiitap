@@ -697,6 +697,16 @@ def list_remove(item_id):
 # Misc
 # ═══════════════════════════════════════════════════════════════════
 
+@app.route("/health")
+def health():
+    key = get_gmaps_key()
+    return jsonify({
+        "status": "ok",
+        "gmaps_key_set": bool(key),
+        "gmaps_key_preview": (key[:8] + "...") if key else None
+    })
+
+
 @app.route("/qr/<int:store_id>")
 def qr_scan(store_id):
     return redirect(url_for("store_detail", store_id=store_id))
