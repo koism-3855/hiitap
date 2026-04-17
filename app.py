@@ -22,7 +22,8 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "hiitap-dev-2026")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///hiitap.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-GMAPS_KEY        = os.environ.get("GOOGLE_MAPS_API_KEY", "")
+def get_gmaps_key():
+    return os.environ.get("GOOGLE_MAPS_API_KEY", "")
 CACHE_TTL_HOURS  = 24          # 検索結果キャッシュの有効期間（時間）
 PLACES_BASE      = "https://maps.googleapis.com/maps/api/place"
 
@@ -97,9 +98,9 @@ class Store(db.Model):
         return len(self.cheers)
 
     def photo_url(self, maxwidth=400):
-        if self.photo_ref and GMAPS_KEY:
+        if self.photo_ref and get_gmaps_key():
             return (f"{PLACES_BASE}/photo"
-                    f"?maxwidth={maxwidth}&photo_reference={self.photo_ref}&key={GMAPS_KEY}")
+                    f"?maxwidth={maxwidth}&photo_reference={self.photo_ref}&key={get_gmaps_key()}")
         return None
 
 
@@ -184,10 +185,10 @@ def load_user(uid):
 
 def _places_get(endpoint, params):
     """Places API への共通リクエスト。失敗時は空リストを返す。"""
-    if not GMAPS_KEY:
+    if not get_gmaps_key():
         return []
     try:
-        r = requests.get(f"{PLACES_BASE}/{endpoint}", params={**params, "key": GMAPS_KEY}, timeout=5)
+        r = requests.get(f"{PLACES_BASE}/{endpoint}", params={**params, "key": get_gmaps_key()}, timeout=5)
         return r.json().get("results", [])
     except Exception as e:
         app.logger.warning(f"Places API error ({endpoint}): {e}")
@@ -209,14 +210,14 @@ def places_nearby_search(lat, lng, radius=800, keyword="", language="ja"):
 
 
 def places_detail(place_id, language="ja"):
-    if not GMAPS_KEY:
+    if not get_gmaps_key():
         return None
     try:
         fields = ("place_id,name,formatted_address,geometry,photo,rating,"
                   "opening_hours,website,formatted_phone_number,types,business_status")
         r = requests.get(f"{PLACES_BASE}/details/json", params={
             "place_id": place_id, "fields": fields,
-            "key": GMAPS_KEY, "language": language
+            "key": get_gmaps_key(), "language": language
         }, timeout=5)
         return r.json().get("result")
     except Exception as e:
@@ -372,7 +373,7 @@ def award_points_and_rank(user):
 
 @app.context_processor
 def inject_globals():
-    return {"gmaps_key": GMAPS_KEY}
+    return {"gmaps_key": get_gmaps_key()}
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -436,7 +437,7 @@ def home():
 def search():
     q         = request.args.get("q", "").strip()
     results   = []
-    use_gmaps = bool(GMAPS_KEY)
+    use_gmaps = bool(get_gmaps_key())
 
     if q:
         if use_gmaps:
@@ -456,7 +457,7 @@ def search():
                             "in_db":         existing is not None})
 
     return render_template("search.html", results=results, query=q,
-                           use_gmaps=use_gmaps, gmaps_key=GMAPS_KEY)
+                           use_gmaps=use_gmaps, gmaps_key=get_gmaps_key())
 
 
 @app.route("/api/places/nearby")
@@ -507,9 +508,9 @@ def store_detail(store_id):
         except Exception:
             pass
     maps_embed_url = ""
-    if store.lat and store.lng and GMAPS_KEY:
+    if store.lat and store.lng and get_gmaps_key():
         maps_embed_url = (f"https://www.google.com/maps/embed/v1/place"
-                         f"?key={GMAPS_KEY}&q={store.lat},{store.lng}&zoom=16")
+                         f"?key={get_gmaps_key()}&q={store.lat},{store.lng}&zoom=16")
     return render_template("store_detail.html", store=store, in_list=in_list,
                            qr_b64=qr_b64, recent_cheers=recent_cheers,
                            hours=hours, maps_embed_url=maps_embed_url)
