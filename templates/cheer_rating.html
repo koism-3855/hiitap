@@ -1,41 +1,59 @@
 {% extends "base.html" %}
-{% block title %}評価 — HiiTap{% endblock %}
+{% block title %}Rate the Service — HiiTap{% endblock %}
 {% block extra_css %}
 <style>
-.rating-box{background:white;border-radius:var(--radius);padding:24px;margin-bottom:16px;border:1px solid var(--border);}
-.rating-label{font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;margin-bottom:16px;}
-.star-row{display:flex;gap:8px;justify-content:center;}
-.star-btn{font-size:2.4rem;cursor:pointer;transition:transform .1s;background:none;border:none;}
+.rating-box { background:white;border-radius:var(--radius);padding:24px;margin-bottom:16px;border:1px solid var(--border); }
+.rating-label { font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;margin-bottom:16px; }
+.star-row { display:flex;gap:8px;justify-content:center; }
+.star-btn { font-size:2.4rem;cursor:pointer;transition:transform 0.1s;background:none;border:none; }
+.star-btn:hover, .star-btn.lit { transform:scale(1.15); }
 </style>
 {% endblock %}
 {% block content %}
 <div class="page">
   <div style="text-align:center;margin-bottom:20px">
-    <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div></div>
-    <h2 style="font-weight:800;font-size:1.3rem">体験はいかがでしたか？</h2>
-    <p style="color:var(--ink-light);font-size:.85rem;margin-top:4px">{{ staff.name }} さんとの</p>
+    <div class="step-indicator">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+    <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.3rem">How was the experience?</h2>
+    <p style="color:var(--ink-light);font-size:0.85rem;margin-top:4px">with {{ staff.name }}</p>
   </div>
+
   <form method="POST">
     <div class="rating-box">
-      <div class="rating-label">🌟 サービスの質</div>
-      <div class="star-row" id="serviceStars">{% for i in range(1,6) %}<button type="button" class="star-btn" onclick="rate('service',{{ i }})">☆</button>{% endfor %}</div>
+      <div class="rating-label">🌟 Service quality</div>
+      <div class="star-row" id="serviceStars">
+        {% for i in range(1,6) %}
+        <button type="button" class="star-btn" onclick="rate('service', {{ i }})">☆</button>
+        {% endfor %}
+      </div>
       <input type="hidden" name="service_rating" id="serviceVal" value="5">
     </div>
+
     <div class="rating-box">
-      <div class="rating-label">✨ 全体的な雰囲気</div>
-      <div class="star-row" id="atmosphereStars">{% for i in range(1,6) %}<button type="button" class="star-btn" onclick="rate('atmosphere',{{ i }})">☆</button>{% endfor %}</div>
+      <div class="rating-label">✨ Overall atmosphere</div>
+      <div class="star-row" id="atmosphereStars">
+        {% for i in range(1,6) %}
+        <button type="button" class="star-btn" onclick="rate('atmosphere', {{ i }})">☆</button>
+        {% endfor %}
+      </div>
       <input type="hidden" name="atmosphere_rating" id="atmosphereVal" value="5">
     </div>
-    <button type="submit" class="btn btn-primary btn-full" style="padding:16px;font-size:1rem">次へ →</button>
+
+    <button type="submit" class="btn btn-primary btn-full" style="padding:16px;font-size:1rem">Continue →</button>
   </form>
 </div>
 {% endblock %}
 {% block scripts %}
 <script>
-function rate(type,val){
-  document.querySelectorAll(`#${type}Stars .star-btn`).forEach((s,i)=>s.textContent=i<val?'★':'☆');
-  document.getElementById(`${type}Val`).value=val;
+function rate(type, val) {
+  const stars = document.querySelectorAll(`#${type}Stars .star-btn`);
+  stars.forEach((s, i) => s.textContent = i < val ? '★' : '☆');
+  document.getElementById(`${type}Val`).value = val;
 }
-window.addEventListener('load',()=>{rate('service',5);rate('atmosphere',5);});
+// Pre-fill with 5
+window.addEventListener('load', () => { rate('service', 5); rate('atmosphere', 5); });
 </script>
 {% endblock %}

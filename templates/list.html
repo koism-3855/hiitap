@@ -3,24 +3,30 @@
 {% block content %}
 <div class="page">
   <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
-    <div><h2>⭐ マイリスト</h2><p>{{ items|length }} 件のお気に入り店舗</p></div>
+    <div>
+      <h2>⭐ My List</h2>
+      <p>{{ items|length }} saved store{{ 's' if items|length != 1 }}</p>
+    </div>
   </div>
+
   {% if all_tags %}
   <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px">
-    <a href="{{ url_for('my_list') }}" style="background:{% if not tag_filter %}var(--brand){% else %}var(--card){% endif %};color:{% if not tag_filter %}white{% else %}var(--ink-light){% endif %};border:1.5px solid {% if not tag_filter %}var(--brand){% else %}var(--border){% endif %};padding:6px 16px;border-radius:99px;font-size:.8rem;font-weight:600;text-decoration:none;white-space:nowrap;font-family:'Sora',sans-serif">All</a>
+    <a href="{{ url_for('my_list') }}" style="background:{% if not tag_filter %}var(--brand){% else %}var(--card){% endif %};color:{% if not tag_filter %}white{% else %}var(--ink-light){% endif %};border:1.5px solid {% if not tag_filter %}var(--brand){% else %}var(--border){% endif %};padding:6px 16px;border-radius:99px;font-size:0.8rem;font-weight:600;text-decoration:none;white-space:nowrap;font-family:'Sora',sans-serif">All</a>
     {% for t in all_tags %}
-    <a href="{{ url_for('my_list', tag=t) }}" style="background:{% if tag_filter==t %}var(--brand){% else %}var(--card){% endif %};color:{% if tag_filter==t %}white{% else %}var(--ink-light){% endif %};border:1.5px solid {% if tag_filter==t %}var(--brand){% else %}var(--border){% endif %};padding:6px 16px;border-radius:99px;font-size:.8rem;font-weight:600;text-decoration:none;white-space:nowrap;font-family:'Sora',sans-serif">{{ t }}</a>
+    <a href="{{ url_for('my_list', tag=t) }}" style="background:{% if tag_filter==t %}var(--brand){% else %}var(--card){% endif %};color:{% if tag_filter==t %}white{% else %}var(--ink-light){% endif %};border:1.5px solid {% if tag_filter==t %}var(--brand){% else %}var(--border){% endif %};padding:6px 16px;border-radius:99px;font-size:0.8rem;font-weight:600;text-decoration:none;white-space:nowrap;font-family:'Sora',sans-serif">{{ t }}</a>
     {% endfor %}
   </div>
   {% endif %}
+
   {% if not items %}
   <div class="card" style="text-align:center;padding:48px 20px">
     <div style="font-size:3rem;margin-bottom:12px">📋</div>
-    <h3 style="margin-bottom:8px">リストが空です</h3>
-    <p style="color:var(--ink-light);font-size:.88rem;margin-bottom:20px">お気に入りのお店を保存して素早くアクセス</p>
-    <a href="{{ url_for('search') }}" class="btn btn-primary">お店を探す</a>
+    <h3 style="font-family:'Sora',sans-serif;margin-bottom:8px">Your list is empty</h3>
+    <p style="color:var(--ink-light);font-size:0.88rem;margin-bottom:20px">Save stores you love to find them again quickly</p>
+    <a href="{{ url_for('search') }}" class="btn btn-primary">Explore stores</a>
   </div>
   {% endif %}
+
   {% for item in items %}
   <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;box-shadow:var(--shadow-sm)">
     <div style="display:flex;align-items:flex-start;gap:12px">
@@ -28,18 +34,26 @@
         {% if item.store.category=='Cafe' %}☕{% elif item.store.category=='Restaurant' %}🍽{% elif item.store.category=='Retail' %}🛍{% else %}🏪{% endif %}
       </div>
       <div style="flex:1">
-        <a href="{{ url_for('store_detail', store_id=item.store_id) }}" style="font-family:'Sora',sans-serif;font-weight:700;font-size:.95rem;color:var(--ink);text-decoration:none">{{ item.store.name }}</a>
-        <div style="font-size:.78rem;color:var(--ink-light);margin-top:2px">📍 {{ item.store.address }}</div>
-        {% if item.tags %}<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">{% for t in item.tags.split(',') %}<span class="tag">{{ t.strip() }}</span>{% endfor %}</div>{% endif %}
-        {% if item.memo %}<div style="font-size:.82rem;color:var(--ink-light);margin-top:6px;font-style:italic">"{{ item.memo }}"</div>{% endif %}
+        <a href="{{ url_for('store_detail', store_id=item.store_id) }}" style="font-family:'Sora',sans-serif;font-weight:700;font-size:0.95rem;color:var(--ink);text-decoration:none">{{ item.store.name }}</a>
+        <div style="font-size:0.78rem;color:var(--ink-light);margin-top:2px">📍 {{ item.store.address }}</div>
+        {% if item.tags %}
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+          {% for t in item.tags.split(',') %}
+          <span class="tag">{{ t.strip() }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if item.memo %}
+        <div style="font-size:0.82rem;color:var(--ink-light);margin-top:6px;font-style:italic">"{{ item.memo }}"</div>
+        {% endif %}
       </div>
       <form method="POST" action="{{ url_for('list_remove', item_id=item.id) }}">
         <button style="background:none;border:none;cursor:pointer;color:var(--ink-light);font-size:1.2rem;padding:4px">🗑</button>
       </form>
     </div>
     <div style="margin-top:12px;display:flex;gap:8px">
-      <a href="{{ url_for('store_detail', store_id=item.store_id) }}" class="btn btn-ghost btn-sm">詳細</a>
-      <a href="{{ url_for('cheer_staff', store_id=item.store_id) }}" class="btn btn-primary btn-sm">♥ チア</a>
+      <a href="{{ url_for('store_detail', store_id=item.store_id) }}" class="btn btn-ghost btn-sm">View store</a>
+      <a href="{{ url_for('cheer_staff', store_id=item.store_id) }}" class="btn btn-primary btn-sm">♥ Cheer</a>
     </div>
   </div>
   {% endfor %}

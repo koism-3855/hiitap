@@ -1,65 +1,152 @@
 {% extends "base.html" %}
-{% block title %}検索 — HiiTap{% endblock %}
+{% block title %}Search — HiiTap{% endblock %}
 {% block extra_css %}
 <style>
-.search-hero{background:linear-gradient(135deg,var(--brand),#C05030);border-radius:var(--radius);padding:24px 20px;margin-bottom:20px;color:white;}
-.search-hero h2{font-weight:800;font-size:1.3rem;margin-bottom:12px;}
+.search-hero{background:linear-gradient(135deg,var(--ink),#2E4080);border-radius:var(--radius);padding:22px 20px;margin-bottom:20px;color:white;}
+.search-hero h2{font-weight:800;font-size:1.25rem;margin-bottom:12px;}
 .search-row{display:flex;gap:8px;}
-.search-input{flex:1;padding:12px 16px;border:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;}
-.search-btn{background:var(--ink);color:white;border:none;border-radius:99px;padding:12px 20px;font-family:'Sora',sans-serif;font-weight:600;cursor:pointer;}
-.cat-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
-.cat-chips::-webkit-scrollbar{display:none;}
-.cat-chip{background:var(--card);border:1.5px solid var(--border);border-radius:99px;padding:6px 16px;font-size:.8rem;font-weight:600;font-family:'Sora',sans-serif;color:var(--ink-light);white-space:nowrap;cursor:pointer;text-decoration:none;transition:all .2s;}
-.cat-chip:hover,.cat-chip.active{background:var(--brand-light);color:var(--brand);border-color:var(--brand);}
+.search-input{flex:1;padding:12px 16px;border:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;color:var(--ink);}
+.search-btn{background:var(--brand);color:white;border:none;border-radius:99px;padding:12px 20px;font-family:'Sora',sans-serif;font-weight:700;cursor:pointer;}
+.search-btn:hover{background:var(--brand-dark);}
+.nearby-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.4);color:white;border-radius:99px;padding:8px 16px;font-family:'Sora',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-top:10px;}
+.nearby-btn:hover{background:rgba(255,255,255,.25);}
+.store-card-g{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:stretch;box-shadow:var(--shadow-sm);margin-bottom:10px;overflow:hidden;transition:all .2s;text-decoration:none;color:inherit;}
+.store-card-g:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.store-thumb{width:88px;flex-shrink:0;background:var(--brand-light);display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden;}
+.store-thumb img{width:88px;height:100%;object-fit:cover;}
+.store-body{flex:1;padding:13px 14px;}
+.store-title{font-family:'Sora',sans-serif;font-weight:700;font-size:.92rem;margin-bottom:3px;}
+.store-addr{font-size:.74rem;color:var(--ink-light);margin-bottom:7px;}
+.badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge-g{background:#FFF9E6;color:#B8860B;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;font-family:'Sora',sans-serif;}
+.badge-h{background:var(--brand-light);color:var(--brand);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;font-family:'Sora',sans-serif;}
+.badge-c{background:var(--surface);color:var(--ink-light);font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid var(--border);font-family:'Sora',sans-serif;}
+.no-api{background:#FFF9E6;border:1px solid #F0D060;border-radius:var(--radius-sm);padding:12px 16px;font-size:.83rem;color:#7D5A00;margin-bottom:16px;}
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.75);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.loading-overlay.show{display:flex;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 {% endblock %}
 {% block content %}
 <div class="page">
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:.88rem;color:var(--ink-light)">Searching Google Maps…</div>
+  </div>
+
   <div class="search-hero">
-    <h2>素晴らしいサービスを見つけよう ♥</h2>
-    <form method="GET" action="{{ url_for('search') }}">
+    <h2>Find a store</h2>
+    <form method="GET" action="{{ url_for('search') }}" onsubmit="showLoading()">
       <div class="search-row">
-        <input type="text" name="q" value="{{ query }}" placeholder="お店を検索…" class="search-input">
-        <button type="submit" class="search-btn">検索</button>
+        <input type="text" name="q" value="{{ query }}" placeholder="Store name or area…" class="search-input">
+        <button type="submit" class="search-btn">Search</button>
       </div>
     </form>
+    {% if gmaps_key %}
+    <button class="nearby-btn" onclick="searchNearby()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      Search nearby
+    </button>
+    {% endif %}
   </div>
-  <div class="cat-chips">
-    <a href="{{ url_for('search') }}" class="cat-chip {% if not category %}active{% endif %}">すべて</a>
-    {% for cat in categories %}
-    <a href="{{ url_for('search', category=cat) }}" class="cat-chip {% if category==cat %}active{% endif %}">
-      {% if cat=='Cafe' %}☕ カフェ{% elif cat=='Restaurant' %}🍽 レストラン{% elif cat=='Retail' %}🛍 ショッピング{% elif cat=='Bar' %}🍸 バー{% elif cat=='Hotel' %}🏨 ホテル{% else %}📍 {{ cat }}{% endif %}
-    </a>
-    {% endfor %}
+
+  {% if not gmaps_key %}
+  <div class="no-api">
+    No Google Maps API key. Add <code>GOOGLE_MAPS_API_KEY=AIza...</code> to <code>.env</code> to enable live Maps search.
   </div>
-  {% if stores %}
-  <div class="section-header"><h2>{{ stores|length }} 件のお店</h2></div>
-  {% for store in stores %}
-  <a href="{{ url_for('store_detail', store_id=store.id) }}" class="store-card">
-    <div class="store-icon">{% if store.category=='Cafe' %}☕{% elif store.category=='Restaurant' %}🍽{% elif store.category=='Retail' %}🛍{% elif store.category=='Bar' %}🍸{% else %}🏪{% endif %}</div>
-    <div class="store-info">
-      <div class="store-name">{{ store.name }}</div>
-      <div class="store-addr">📍 {{ store.address }}</div>
-      <div style="margin-top:6px">
-        {% if store.is_affiliated %}<span class="store-badge">✓ HiiTapパートナー</span>{% endif %}
-        <span style="font-size:.75rem;color:var(--ink-light);margin-left:6px">スタッフ {{ store.staff|length }} 名</span>
+  {% endif %}
+
+  <div id="nearbySection" style="display:none">
+    <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div><h2>Nearby stores</h2><p id="nearbySubtitle"></p></div>
+      <button onclick="document.getElementById('nearbySection').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:.85rem;color:var(--ink-light)">✕ Close</button>
+    </div>
+    <div id="nearbyResults"></div>
+  </div>
+
+  {% if results %}
+  <div class="section-header">
+    <h2>{{ results|length }} result{{ 's' if results|length != 1 }} for "{{ query }}"</h2>
+    {% if gmaps_key %}<p>Powered by Google Maps</p>{% endif %}
+  </div>
+  {% for r in results %}
+  <a href="{{ url_for('store_by_place', place_id=r.place_id) if r.place_id else '#' }}" class="store-card-g" onclick="showLoading()">
+    <div class="store-thumb">
+      {% if r.photo_ref and gmaps_key %}
+      <img src="https://maps.googleapis.com/maps/api/place/photo?maxwidth=180&photo_reference={{ r.photo_ref }}&key={{ gmaps_key }}" loading="lazy">
+      {% else %}
+      {{ '☕' if r.category=='Cafe' else '🍽' if r.category=='Restaurant' else '🛍' if r.category=='Retail' else '🍸' if r.category=='Bar' else '🏨' if r.category=='Hotel' else '🏪' }}
+      {% endif %}
+    </div>
+    <div class="store-body">
+      <div class="store-title">{{ r.name }}</div>
+      <div class="store-addr">{{ r.address }}</div>
+      <div class="badges">
+        {% if r.google_rating %}<span class="badge-g">★ {{ r.google_rating }} Google</span>{% endif %}
+        {% if r.hiitap_rating %}<span class="badge-h">♥ {{ r.hiitap_rating }} HiiTap</span>{% endif %}
+        {% if r.hiitap_count  %}<span class="badge-c">{{ r.hiitap_count }} cheers</span>{% endif %}
+        <span class="badge-c">{{ r.category }}</span>
+        {% if r.is_affiliated %}<span class="affiliated-badge">✓ Partner</span>{% endif %}
       </div>
     </div>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" style="flex-shrink:0;color:var(--ink-light)"><path d="m9 18 6-6-6-6"/></svg>
   </a>
   {% endfor %}
-  {% elif query or category %}
+  {% elif query %}
   <div class="card" style="text-align:center;padding:40px 20px">
     <div style="font-size:2.5rem;margin-bottom:12px">🔍</div>
-    <h3 style="margin-bottom:8px">お店が見つかりませんでした</h3>
-    <p style="color:var(--ink-light);font-size:.88rem">別の名前またはカテゴリで試してください</p>
+    <h3 style="margin-bottom:8px">No results for "{{ query }}"</h3>
+    <p style="color:var(--ink-light);font-size:.88rem">Try different keywords or search nearby</p>
   </div>
   {% else %}
-  <div class="card" style="text-align:center;padding:40px 20px">
-    <div style="font-size:2.5rem;margin-bottom:12px">🏪</div>
-    <h3 style="margin-bottom:8px">お店を検索</h3>
-    <p style="color:var(--ink-light);font-size:.88rem">店名を入力するかカテゴリを選択してください</p>
+  <div class="card" style="text-align:center;padding:44px 20px">
+    <div style="font-size:2.8rem;margin-bottom:12px">🗺</div>
+    <h3 style="margin-bottom:8px">Search any store</h3>
+    <p style="color:var(--ink-light);font-size:.88rem;max-width:280px;margin:0 auto">Type a store name or tap "Search nearby"</p>
   </div>
   {% endif %}
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+const GMAPS_KEY = "{{ gmaps_key }}";
+function showLoading(){ document.getElementById('loadingOverlay').classList.add('show'); }
+function catEmoji(c){ return {Cafe:'☕',Restaurant:'🍽',Retail:'🛍',Bar:'🍸',Hotel:'🏨'}[c]||'🏪'; }
+function renderCard(r){
+  const url   = r.place_id ? `/store/place/${r.place_id}` : '#';
+  const thumb = (r.photo_ref && GMAPS_KEY)
+    ? `<img src="https://maps.googleapis.com/maps/api/place/photo?maxwidth=180&photo_reference=${r.photo_ref}&key=${GMAPS_KEY}" loading="lazy" style="width:88px;height:100%;object-fit:cover">`
+    : `<span style="font-size:2rem">${catEmoji(r.category)}</span>`;
+  const gB = r.google_rating ? `<span class="badge-g">★ ${r.google_rating} Google</span>` : '';
+  const hB = r.hiitap_count  ? `<span class="badge-h">♥ ${r.hiitap_count} cheers</span>` : '';
+  const pB = r.is_affiliated ? `<span class="affiliated-badge">✓ Partner</span>` : '';
+  return `<a href="${url}" class="store-card-g" onclick="showLoading()">
+    <div class="store-thumb">${thumb}</div>
+    <div class="store-body">
+      <div class="store-title">${r.name}</div>
+      <div class="store-addr">${r.address||''}</div>
+      <div class="badges">${gB}${hB}<span class="badge-c">${r.category}</span>${pB}</div>
+    </div></a>`;
+}
+function searchNearby(){
+  if(!navigator.geolocation){ alert('Geolocation not supported.'); return; }
+  showLoading();
+  navigator.geolocation.getCurrentPosition(pos=>{
+    fetch(`/api/places/nearby?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
+      .then(r=>r.json())
+      .then(data=>{
+        document.getElementById('loadingOverlay').classList.remove('show');
+        const sec = document.getElementById('nearbySection');
+        document.getElementById('nearbySubtitle').textContent =
+          data.results?.length ? `${data.results.length} stores within 800m` : '';
+        document.getElementById('nearbyResults').innerHTML =
+          data.results?.length ? data.results.map(renderCard).join('') :
+          '<p style="color:var(--ink-light);font-size:.88rem;padding:16px">No stores found nearby.</p>';
+        sec.style.display='block';
+        sec.scrollIntoView({behavior:'smooth'});
+      })
+      .catch(()=>{ document.getElementById('loadingOverlay').classList.remove('show'); alert('Search failed.'); });
+  }, ()=>{ document.getElementById('loadingOverlay').classList.remove('show'); alert('Location denied.'); });
+}
+</script>
 {% endblock %}

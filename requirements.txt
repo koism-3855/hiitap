@@ -1,7 +1,8 @@
 flask>=3.0
 flask-sqlalchemy>=3.1
 flask-login>=0.6
-flask-wtf>=1.2
 qrcode[pil]>=8.0
 pillow>=10.0
+requests>=2.31
+python-dotenv>=1.0
 gunicorn>=21.2

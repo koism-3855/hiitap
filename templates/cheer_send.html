@@ -1,40 +1,51 @@
 {% extends "base.html" %}
-{% block title %}送信 — HiiTap{% endblock %}
+{% block title %}Send Appreciation — HiiTap{% endblock %}
 {% block extra_css %}
 <style>
-.ticket-card{background:linear-gradient(135deg,var(--ink),#2A3A6A);border-radius:var(--radius);padding:28px 24px;color:white;text-align:center;margin-bottom:20px;}
+.ticket-card {
+  background:linear-gradient(135deg,var(--ink),#2A3A6A);
+  border-radius:var(--radius); padding:28px 24px;
+  color:white; text-align:center; margin-bottom:20px;
+}
+.ticket-icon { font-size:3rem; margin-bottom:8px; }
+.ticket-count { font-family:'Sora',sans-serif; font-weight:800; font-size:2.5rem; color:var(--brand); }
 </style>
 {% endblock %}
 {% block content %}
 <div class="page">
   <div style="text-align:center;margin-bottom:20px">
-    <h2 style="font-weight:800;font-size:1.3rem">送信する準備はできていますか？ 🎟</h2>
-    <p style="color:var(--ink-light);font-size:.85rem;margin-top:4px">{{ staff.name }} @ {{ store.name }}</p>
+    <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.3rem">Ready to send? 🎟</h2>
+    <p style="color:var(--ink-light);font-size:0.85rem;margin-top:4px">Your appreciation will go to {{ staff.name }} at {{ store.name }}</p>
   </div>
+
   {% if already %}
   <div class="card card-body" style="text-align:center;border-color:var(--brand)">
     <div style="font-size:2.5rem;margin-bottom:10px">⏰</div>
-    <h3 style="margin-bottom:8px">本日すでに感謝を送りました！</h3>
-    <p style="color:var(--ink-light);font-size:.88rem">{{ staff.name }} さんへは明日またチアを送れます。</p>
-    <a href="{{ url_for('home') }}" class="btn btn-primary" style="margin-top:16px">フィードに戻る</a>
+    <h3 style="font-family:'Sora',sans-serif;margin-bottom:8px">Already appreciated today!</h3>
+    <p style="color:var(--ink-light);font-size:0.88rem">Come back tomorrow to send another cheer to {{ staff.name }}.</p>
+    <a href="{{ url_for('home') }}" class="btn btn-primary" style="margin-top:16px">Back to feed</a>
   </div>
   {% else %}
   <div class="ticket-card">
-    <div style="font-size:3rem;margin-bottom:8px">🎟</div>
-    <div style="font-size:.85rem;opacity:.75;margin-bottom:6px">チアチケット</div>
-    <div style="font-family:'Sora',sans-serif;font-weight:800;font-size:2.5rem;color:var(--brand)">{{ tickets }}</div>
-    <div style="font-size:.82rem;opacity:.65;margin-top:6px">チケット1枚が使用されます</div>
+    <div class="ticket-icon">🎟</div>
+    <div style="font-size:0.85rem;opacity:0.75;margin-bottom:6px">Your cheer tickets</div>
+    <div class="ticket-count">{{ tickets }}</div>
+    <div style="font-size:0.82rem;opacity:0.65;margin-top:6px">1 ticket will be used to send this appreciation</div>
   </div>
+
   {% if tickets < 1 %}
   <div class="card card-body" style="text-align:center;margin-bottom:16px">
-    <p style="color:var(--error);font-weight:600">チケットがありません！マイページから無料の毎日チケットを受け取ってください。</p>
-    <a href="{{ url_for('mypage') }}" class="btn btn-primary" style="margin-top:12px">マイページへ</a>
+    <p style="color:var(--error);font-weight:600">You're out of cheer tickets!</p>
+    <p style="font-size:0.85rem;color:var(--ink-light);margin-top:6px">Get your free daily ticket from My Page, or purchase more.</p>
+    <a href="{{ url_for('mypage') }}" class="btn btn-primary" style="margin-top:12px">Go to My Page</a>
   </div>
   {% else %}
   <form method="POST">
-    <button type="submit" class="btn btn-primary btn-full" style="padding:18px;font-size:1.05rem">♥ {{ staff.name }} さんに送る</button>
+    <button type="submit" class="btn btn-primary btn-full" style="padding:18px;font-size:1.05rem">
+      ♥ Send 1 Cheer Ticket to {{ staff.name }}
+    </button>
   </form>
-  <a href="{{ url_for('home') }}" style="display:block;text-align:center;margin-top:14px;font-size:.85rem;color:var(--ink-light)">キャンセル</a>
+  <a href="{{ url_for('home') }}" style="display:block;text-align:center;margin-top:14px;font-size:0.85rem;color:var(--ink-light)">Cancel</a>
   {% endif %}
   {% endif %}
 </div>

@@ -2,92 +2,146 @@
 {% block title %}My Page — HiiTap{% endblock %}
 {% block extra_css %}
 <style>
-.profile-hero{background:linear-gradient(135deg,var(--ink),#2A3A6A);border-radius:var(--radius);padding:28px 20px;color:white;margin-bottom:16px;display:flex;flex-direction:column;align-items:center;text-align:center;}
-.profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:800;font-size:2rem;color:white;border:3px solid rgba(255,255,255,.3);margin-bottom:12px;}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
-.stat-box{background:white;border-radius:var(--radius-sm);padding:16px 12px;text-align:center;border:1px solid var(--border);}
-.stat-num{font-family:'Sora',sans-serif;font-weight:800;font-size:1.6rem;color:var(--brand);}
-.stat-lbl{font-size:.72rem;color:var(--ink-light);font-weight:600;margin-top:3px;}
+.profile-hero {
+  background:linear-gradient(135deg,var(--ink),#2A3A6A);
+  border-radius:var(--radius); padding:28px 20px; color:white; margin-bottom:16px;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+}
+.profile-avatar {
+  width:72px; height:72px; border-radius:50%;
+  background:var(--brand); display:flex; align-items:center; justify-content:center;
+  font-family:'Sora',sans-serif; font-weight:800; font-size:2rem; color:white;
+  border:3px solid rgba(255,255,255,0.3); margin-bottom:12px;
+}
+.stats-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px; }
+.stat-box {
+  background:white; border-radius:var(--radius-sm); padding:16px 12px;
+  text-align:center; border:1px solid var(--border);
+}
+.stat-num { font-family:'Sora',sans-serif; font-weight:800; font-size:1.6rem; color:var(--brand); }
+.stat-lbl { font-size:0.72rem; color:var(--ink-light); font-weight:600; margin-top:3px; }
+.rank-progress {
+  background:white; border-radius:var(--radius); padding:20px; border:1px solid var(--border);
+  margin-bottom:16px;
+}
+.ticket-row {
+  background:white; border-radius:var(--radius); padding:20px; border:1px solid var(--border);
+  margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;
+}
 </style>
 {% endblock %}
 {% block content %}
 <div class="page">
   <div class="profile-hero">
     <div class="profile-avatar">{{ current_user.display_name[0].upper() }}</div>
-    <h2 style="font-weight:800;font-size:1.3rem">{{ current_user.display_name }}</h2>
-    <div style="font-size:.82rem;opacity:.7;margin-top:3px">{{ current_user.email }}</div>
-    <div style="margin-top:12px"><span class="rank-badge rank-{{ current_user.status }}">{{ current_user.rank_label() }}</span></div>
-  </div>
-  <div class="stats-grid">
-    <div class="stat-box"><div class="stat-num">{{ current_user.total_cheer_count }}</div><div class="stat-lbl">送ったチア</div></div>
-    <div class="stat-box"><div class="stat-num" id="ticketCount">{{ current_user.ticket_count }}</div><div class="stat-lbl">🎟 Tickets</div></div>
-    <div class="stat-box"><div class="stat-num">{{ current_user.hiitap_points }}</div><div class="stat-lbl">HiiTap Pts</div></div>
-  </div>
-  <!-- Daily ticket -->
-  <div style="background:white;border-radius:var(--radius);padding:20px;border:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
-    <div>
-      <div style="font-family:'Sora',sans-serif;font-weight:700">🎟 毎日無料チケット</div>
-      <div style="font-size:.8rem;color:var(--ink-light);margin-top:2px">毎日深夜0時にリセット</div>
+    <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.3rem">{{ current_user.display_name }}</h2>
+    <div style="font-size:0.82rem;opacity:0.7;margin-top:3px">{{ current_user.email }}</div>
+    <div style="margin-top:12px">
+      <span class="rank-badge rank-{{ current_user.status }}">{{ current_user.rank_label() }}</span>
     </div>
-    <button onclick="claimDaily()" id="dailyBtn" class="btn btn-primary btn-sm">受け取る</button>
   </div>
+
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-num">{{ current_user.total_cheer_count }}</div>
+      <div class="stat-lbl">Total Cheers</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">{{ current_user.ticket_count }}</div>
+      <div class="stat-lbl">🎟 Tickets</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">{{ current_user.hiitap_points }}</div>
+      <div class="stat-lbl">HiiTap Pts</div>
+    </div>
+  </div>
+
+  <!-- Daily ticket -->
+  <div class="ticket-row">
+    <div>
+      <div style="font-family:'Sora',sans-serif;font-weight:700">🎟 Daily Free Ticket</div>
+      <div style="font-size:0.8rem;color:var(--ink-light);margin-top:2px">Resets every day at midnight</div>
+    </div>
+    <button onclick="claimDaily()" id="dailyBtn" class="btn btn-primary btn-sm">Claim</button>
+  </div>
+
   <!-- Rank progress -->
-  <div style="background:white;border-radius:var(--radius);padding:20px;border:1px solid var(--border);margin-bottom:16px">
+  <div class="rank-progress">
     <div style="display:flex;justify-content:space-between;margin-bottom:10px">
-      <span style="font-family:'Sora',sans-serif;font-weight:700">ランク進捗</span>
+      <span style="font-family:'Sora',sans-serif;font-weight:700">Rank Progress</span>
       <span class="rank-badge rank-{{ current_user.status }}">{{ current_user.rank_label() }}</span>
     </div>
     {% if current_user.status == 'bronze' %}
-    <p style="font-size:.82rem;color:var(--ink-light);margin-bottom:8px">あと {{ [5 - current_user.total_cheer_count, 0]|max }} チアでシルバーへ</p>
+    <p style="font-size:0.82rem;color:var(--ink-light);margin-bottom:8px">{{ 5 - current_user.total_cheer_count }} more cheers to Silver</p>
     <div class="progress-bar"><div class="progress-fill" style="width:{{ [current_user.total_cheer_count * 20, 100]|min }}%"></div></div>
     {% elif current_user.status == 'silver' %}
-    <p style="font-size:.82rem;color:var(--ink-light);margin-bottom:8px">今月あと {{ [10 - current_user.monthly_cheer_count, 0]|max }} チアでゴールドへ</p>
+    <p style="font-size:0.82rem;color:var(--ink-light);margin-bottom:8px">{{ [10 - current_user.monthly_cheer_count, 0]|max }} more cheers this month to Gold</p>
     <div class="progress-bar"><div class="progress-fill" style="width:{{ [current_user.monthly_cheer_count * 10, 100]|min }}%"></div></div>
     {% elif current_user.status == 'gold' %}
-    <p style="font-size:.82rem;color:var(--ink-light);margin-bottom:8px">今月あと {{ [20 - current_user.monthly_cheer_count, 0]|max }} チアでプラチナへ</p>
+    <p style="font-size:0.82rem;color:var(--ink-light);margin-bottom:8px">{{ [20 - current_user.monthly_cheer_count, 0]|max }} more cheers this month to Platinum 💎</p>
     <div class="progress-bar"><div class="progress-fill" style="width:{{ [current_user.monthly_cheer_count * 5, 100]|min }}%"></div></div>
     {% else %}
-    <p style="font-size:.82rem;color:#7B5EA7">最高ランク達成！ 💎 プラチナ</p>
-    <div class="progress-bar"><div class="progress-fill" style="width:100%;background:#7B5EA7"></div></div>
+    <p style="font-size:0.82rem;color:var(--platinum)">You're at the top! 💎 Platinum</p>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--platinum)"></div></div>
     {% endif %}
   </div>
+
+  <!-- Redeem points -->
   {% if current_user.hiitap_points >= 500 %}
   <div class="card card-body" style="margin-bottom:16px">
-    <h3 style="font-weight:700;margin-bottom:12px">🎁 ポイント交換</h3>
-    <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:12px">現在 <strong>{{ current_user.hiitap_points }} pts</strong> 保有。500pt = 500円ギフト券。</p>
+    <h3 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:12px">🎁 Redeem Points</h3>
+    <p style="font-size:0.85rem;color:var(--ink-light);margin-bottom:12px">You have <strong>{{ current_user.hiitap_points }} pts</strong>. 500 pts = $5 gift card value.</p>
     <form method="POST" action="{{ url_for('redeem_points') }}" style="display:flex;gap:8px">
-      <input type="number" name="amount" value="500" min="500" step="500" max="{{ current_user.hiitap_points }}" style="flex:1;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem">
-      <button type="submit" class="btn btn-primary">交換する</button>
+      <input type="number" name="amount" value="500" min="500" step="500" max="{{ current_user.hiitap_points }}"
+        style="flex:1;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem">
+      <button type="submit" class="btn btn-primary">Redeem</button>
     </form>
   </div>
   {% endif %}
+
+  <!-- Cheer history -->
   {% if cheers %}
-  <div class="section-header"><h2>チア履歴</h2><p>{{ cheers|length }} 件のチアを送信</p></div>
+  <div class="section-header">
+    <h2>My Appreciation History</h2>
+    <p>{{ cheers|length }} cheers sent</p>
+  </div>
   {% for cheer in cheers %}
   <div class="cheer-card">
     <div class="cheer-header">
-      <img src="{{ cheer.staff.photo_url }}" class="cheer-avatar" alt="{{ cheer.staff.name }}">
+      <img src="{{ cheer.staff.photo_url if cheer.staff else '/avatar.svg' }}" class="cheer-avatar" alt="{{ cheer.staff.name if cheer.staff else '' }}">
       <div class="cheer-meta">
-        <div class="cheer-name">{{ cheer.staff.name }}</div>
+        <div class="cheer-name">{{ cheer.staff.name if cheer.staff else 'スタッフ' }}</div>
         <div class="cheer-sub">{{ cheer.store.name }} · {{ cheer.created_at.strftime('%b %d, %Y') }}</div>
         <div class="cheer-stars">{{ '★' * cheer.service_rating }}{{ '☆' * (5-cheer.service_rating) }}</div>
       </div>
     </div>
-    {% if cheer.good_points_list() %}<div class="cheer-tags">{% for pt in cheer.good_points_list() %}<span class="tag">{{ pt }}</span>{% endfor %}</div>{% endif %}
+    {% if cheer.good_points_list() %}
+    <div class="cheer-tags">{% for pt in cheer.good_points_list() %}<span class="tag">{{ pt }}</span>{% endfor %}</div>
+    {% endif %}
   </div>
   {% endfor %}
   {% endif %}
-  <div style="margin-top:20px;text-align:center"><a href="{{ url_for('logout') }}" style="font-size:.85rem;color:var(--ink-light)">ログアウト</a></div>
+
+  <div style="margin-top:20px;text-align:center">
+    <a href="{{ url_for('logout') }}" style="font-size:0.85rem;color:var(--ink-light)">Log out</a>
+  </div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script>
-async function claimDaily(){
-  const btn=document.getElementById('dailyBtn');btn.disabled=true;
-  const res=await fetch('/daily-ticket',{method:'POST'});
-  const data=await res.json();
-  if(data.ok){btn.textContent='✓ 受け取り済み！';btn.style.background='var(--success)';document.getElementById('ticketCount').textContent=data.tickets;}
-  else{btn.textContent='受け取り済み';btn.style.background='var(--ink-light)';}
+async function claimDaily() {
+  const btn = document.getElementById('dailyBtn');
+  btn.disabled = true;
+  const res = await fetch('/daily-ticket', {method:'POST'});
+  const data = await res.json();
+  if (data.ok) {
+    btn.textContent = '✓ Claimed!';
+    btn.style.background = 'var(--success)';
+    document.querySelectorAll('.stat-num')[1].textContent = data.tickets;
+  } else {
+    btn.textContent = 'Already claimed';
+    btn.style.background = 'var(--ink-light)';
+  }
 }
 </script>
 {% endblock %}

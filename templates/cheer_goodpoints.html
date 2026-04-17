@@ -1,58 +1,77 @@
 {% extends "base.html" %}
-{% block title %}良かった点 — HiiTap{% endblock %}
+{% block title %}Best Moments — HiiTap{% endblock %}
 {% block extra_css %}
 <style>
-.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
-.option-chip{border:2px solid var(--border);border-radius:12px;padding:12px 14px;font-family:'Sora',sans-serif;font-weight:600;font-size:.85rem;background:white;cursor:pointer;transition:all .2s;text-align:center;color:var(--ink);}
-.option-chip:hover{border-color:var(--brand);background:var(--brand-light);}
-.option-chip.selected{border-color:var(--brand);background:var(--brand);color:white;}
+.option-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.option-chip {
+  border:2px solid var(--border); border-radius:12px; padding:12px 14px;
+  font-family:'Sora',sans-serif; font-weight:600; font-size:0.85rem;
+  background:white; cursor:pointer; transition:all 0.2s; text-align:center;
+  color:var(--ink);
+}
+.option-chip:hover { border-color:var(--brand); background:var(--brand-light); }
+.option-chip.selected { border-color:var(--brand); background:var(--brand); color:white; }
 </style>
 {% endblock %}
 {% block content %}
 <div class="page">
   <div style="text-align:center;margin-bottom:20px">
-    <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div></div>
-    <h2 style="font-weight:800;font-size:1.3rem">特に良かった点は？</h2>
-    <p style="color:var(--ink-light);font-size:.85rem;margin-top:4px">当てはまるものをすべて選んでください</p>
+    <div class="step-indicator">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+    </div>
+    <h2 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.3rem">What stood out?</h2>
+    <p style="color:var(--ink-light);font-size:0.85rem;margin-top:4px">Select all that apply</p>
   </div>
+
   <form method="POST">
     <div class="option-grid" id="optGrid">
       {% for opt in options %}
-      <div class="option-chip" onclick="toggleOpt(this,'{{ opt }}')">{{ opt }}</div>
+      <div class="option-chip" onclick="toggleOpt(this, '{{ opt }}')">{{ opt }}</div>
       {% endfor %}
     </div>
+
     <div id="hiddenInputs"></div>
+
     <div class="card card-body" style="margin-bottom:16px">
-      <label style="font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem;display:block;margin-bottom:10px">💬 コメント <span style="font-weight:400;color:var(--ink-light)">（任意）</span></label>
-      <textarea name="comment" rows="3" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;resize:none;outline:none" placeholder="何が特別だったか伝えましょう…"></textarea>
+      <label style="font-family:'Sora',sans-serif;font-weight:700;font-size:0.9rem;display:block;margin-bottom:10px">💬 Add a personal message <span style="font-weight:400;color:var(--ink-light)">(optional)</span></label>
+      <textarea name="comment" rows="3" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;resize:none;outline:none" placeholder="Tell them what made your experience special…"></textarea>
     </div>
+
     <div class="card card-body" style="margin-bottom:20px">
-      <label style="font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem;display:block;margin-bottom:8px">👁 フィードに共有しますか？</label>
+      <label style="font-family:'Sora',sans-serif;font-weight:700;font-size:0.9rem;display:block;margin-bottom:8px">👁 Share on community feed?</label>
       <div style="display:flex;gap:10px">
-        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px;border:2px solid var(--border);border-radius:10px;cursor:pointer" id="shareYesLbl">
-          <input type="radio" name="is_shared" value="yes" checked onchange="shareToggle(this)"> はい、公開
+        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:border 0.2s" id="shareYesLbl">
+          <input type="radio" name="is_shared" value="yes" checked onchange="shareToggle(this)"> Yes, share publicly
         </label>
-        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px;border:2px solid var(--border);border-radius:10px;cursor:pointer" id="shareNoLbl">
-          <input type="radio" name="is_shared" value="no" onchange="shareToggle(this)"> 非公開
+        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:border 0.2s" id="shareNoLbl">
+          <input type="radio" name="is_shared" value="no" onchange="shareToggle(this)"> Keep it private
         </label>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary btn-full" style="padding:16px;font-size:1rem">感謝を送る ♥</button>
+
+    <button type="submit" class="btn btn-primary btn-full" style="padding:16px;font-size:1rem">Send Appreciation ♥</button>
   </form>
 </div>
 {% endblock %}
 {% block scripts %}
 <script>
-const sel=new Set();
-function toggleOpt(el,val){
-  if(sel.has(val)){sel.delete(val);el.classList.remove('selected');}
-  else{sel.add(val);el.classList.add('selected');}
-  const w=document.getElementById('hiddenInputs');w.innerHTML='';
-  sel.forEach(v=>{const i=document.createElement('input');i.type='hidden';i.name='good_points';i.value=v;w.appendChild(i);});
+const selected = new Set();
+function toggleOpt(el, val) {
+  if (selected.has(val)) { selected.delete(val); el.classList.remove('selected'); }
+  else { selected.add(val); el.classList.add('selected'); }
+  const wrap = document.getElementById('hiddenInputs');
+  wrap.innerHTML = '';
+  selected.forEach(v => {
+    const inp = document.createElement('input');
+    inp.type='hidden'; inp.name='good_points'; inp.value=v;
+    wrap.appendChild(inp);
+  });
 }
-function shareToggle(el){
-  document.getElementById('shareYesLbl').style.borderColor=el.value=='yes'?'var(--brand)':'var(--border)';
-  document.getElementById('shareNoLbl').style.borderColor=el.value=='no'?'var(--brand)':'var(--border)';
+function shareToggle(el) {
+  document.getElementById('shareYesLbl').style.borderColor = el.value=='yes' ? 'var(--brand)' : 'var(--border)';
+  document.getElementById('shareNoLbl').style.borderColor  = el.value=='no'  ? 'var(--brand)' : 'var(--border)';
 }
 shareToggle({value:'yes'});
 </script>

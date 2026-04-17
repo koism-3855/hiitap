@@ -1,22 +1,32 @@
 {% extends "base.html" %}
-{% block title %}送信完了！ — HiiTap{% endblock %}
+{% block title %}Sent! — HiiTap{% endblock %}
 {% block extra_css %}
 <style>
-.celebrate{text-align:center;padding:60px 24px;}
-@keyframes pop{0%{transform:scale(0) rotate(-10deg)}80%{transform:scale(1.1) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
-.big-check{width:80px;height:80px;background:var(--brand);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:20px auto;color:white;animation:pop .5s .3s ease-out both;}
+.celebrate { text-align:center; padding:60px 24px; }
+.confetti { font-size:4rem; animation:pop 0.6s ease-out; }
+@keyframes pop { 0%{transform:scale(0) rotate(-10deg)} 80%{transform:scale(1.1) rotate(3deg)} 100%{transform:scale(1) rotate(0)} }
+.big-check {
+  width:80px; height:80px; background:var(--brand); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; margin:20px auto; color:white;
+  animation:pop 0.5s 0.3s ease-out both;
+}
 </style>
 {% endblock %}
 {% block content %}
-<div class="page"><div class="celebrate">
-  <div style="font-size:4rem;animation:pop .6s ease-out">🎉</div>
-  <div class="big-check">♥</div>
-  <h1 style="font-weight:800;font-size:1.8rem;margin-bottom:12px">感謝が届きました！</h1>
-  <p style="color:var(--ink-light);font-size:.95rem;max-width:300px;margin:0 auto 8px;line-height:1.7">あなたのひと言が、誰かの一日を輝かせました。♥</p>
-  <p style="font-size:.85rem;color:var(--brand);font-weight:600;margin-bottom:32px">+{{ current_user.points_per_cheer() }} ステータスポイント獲得！</p>
-  <div style="display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto">
-    <a href="{{ url_for('home') }}" class="btn btn-primary">フィードに戻る</a>
-    <a href="{{ url_for('search') }}" class="btn btn-ghost">別のお店を探す</a>
+<div class="page">
+  <div class="celebrate">
+    <div class="confetti">🎉</div>
+    <div class="big-check">♥</div>
+    <h1 style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.8rem;margin-bottom:12px">Appreciation sent!</h1>
+    <p style="color:var(--ink-light);font-size:0.95rem;max-width:300px;margin:0 auto 8px;line-height:1.7">
+      You've just made someone's day a little brighter. Your cheer has been delivered. ♥
+    </p>
+    <p style="font-size:0.85rem;color:var(--brand);font-weight:600;margin-bottom:32px">+{{ current_user.points_per_cheer() }} status points earned!</p>
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto">
+      <a href="{{ url_for('home') }}" class="btn btn-primary">Back to feed</a>
+      <a href="{{ url_for('search') }}" class="btn btn-ghost">Find another store</a>
+    </div>
   </div>
-</div></div>
+</div>
 {% endblock %}

@@ -2,67 +2,168 @@
 {% block title %}{{ store.name }} — HiiTap{% endblock %}
 {% block extra_css %}
 <style>
-.store-hero{background:linear-gradient(135deg,var(--ink),#2A3A6A);border-radius:var(--radius);padding:28px 20px;margin-bottom:20px;color:white;}
-.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
-.staff-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block;}
+.store-hero{position:relative;border-radius:var(--radius);overflow:hidden;margin-bottom:20px;min-height:200px;background:linear-gradient(135deg,var(--ink),#2E4080);}
+.hero-img{width:100%;height:220px;object-fit:cover;opacity:.7;display:block;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72) 0%,transparent 50%);display:flex;flex-direction:column;justify-content:flex-end;padding:20px;}
+.hero-no-img{padding:28px 20px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-box{background:white;border-radius:var(--radius-sm);padding:14px 12px;border:1px solid var(--border);text-align:center;}
+.stat-val{font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;color:var(--brand);}
+.stat-lbl{font-size:.72rem;color:var(--ink-light);font-weight:600;margin-top:2px;}
+.maps-embed{width:100%;height:200px;border:none;border-radius:var(--radius);display:block;margin-bottom:16px;}
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+.staff-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;text-align:center;text-decoration:none;color:inherit;display:block;transition:all .2s;}
 .staff-item:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
 .staff-item img{width:100%;aspect-ratio:1;object-fit:cover;}
-.staff-item-info{padding:10px 8px;}
-.staff-item-name{font-family:'Sora',sans-serif;font-weight:700;font-size:.85rem;}
-.staff-item-pts{font-size:.75rem;color:var(--brand);font-weight:600;}
-.qr-section{background:var(--brand-light);border:1.5px dashed var(--brand);border-radius:var(--radius);padding:20px;text-align:center;margin-top:20px;}
+.staff-item-info{padding:9px 8px;}
+.staff-item-name{font-family:'Sora',sans-serif;font-weight:700;font-size:.83rem;}
+.staff-item-pts{font-size:.72rem;color:var(--brand);font-weight:600;}
+.hours-list{list-style:none;font-size:.82rem;color:var(--ink-light);line-height:2;}
+.qr-box{background:var(--brand-light);border:1.5px dashed var(--brand);border-radius:var(--radius);padding:20px;text-align:center;margin-top:20px;}
 </style>
 {% endblock %}
 {% block content %}
 <div class="page">
-  <a href="{{ url_for('search') }}" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-light);font-size:.85rem;text-decoration:none;margin-bottom:16px;font-weight:500">← 戻る</a>
+  <a href="{{ url_for('search') }}" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-light);font-size:.83rem;text-decoration:none;margin-bottom:14px;font-weight:600">← Search</a>
+
+  <!-- Hero -->
   <div class="store-hero">
-    <div style="font-size:3rem;margin-bottom:10px">{% if store.category=='Cafe' %}☕{% elif store.category=='Restaurant' %}🍽{% elif store.category=='Retail' %}🛍{% elif store.category=='Bar' %}🍸{% else %}🏪{% endif %}</div>
-    <h1 style="font-weight:800;font-size:1.6rem">{{ store.name }}</h1>
-    <div style="font-size:.85rem;opacity:.75;margin-top:4px">📍 {{ store.address }}</div>
-    {% if store.is_affiliated %}<div style="margin-top:8px;display:inline-block;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:99px;font-size:.75rem;font-weight:700">✓ HiiTapパートナー</div>{% endif %}
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <a href="{{ url_for('cheer_staff', store_id=store.id) }}" class="btn btn-primary">♥ 感謝を送る</a>
-      {% if in_list %}
-      <form method="POST" action="{{ url_for('list_remove', item_id=in_list.id) }}" style="display:inline">
-        <button class="btn" style="background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.4);color:white">★ 保存済み</button>
-      </form>
-      {% else %}
-      <button onclick="document.getElementById('list-modal').style.display='flex'" class="btn" style="background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.4);color:white">☆ 保存</button>
-      {% endif %}
+    {% if store.photo_url() %}
+    <img src="{{ store.photo_url(600) }}" class="hero-img" alt="{{ store.name }}">
+    <div class="hero-overlay">
+    {% else %}
+    <div class="hero-no-img">
+    {% endif %}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        <span style="background:rgba(255,255,255,.15);color:white;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:99px;font-family:'Sora',sans-serif">{{ store.category }}</span>
+        {% if store.is_affiliated %}<span class="affiliated-badge">✓ HiiTap Partner</span>{% endif %}
+      </div>
+      <h1 style="color:white;font-weight:800;font-size:1.5rem">{{ store.name }}</h1>
+      <div style="color:rgba(255,255,255,.8);font-size:.82rem;margin-top:4px">{{ store.address }}</div>
+      {% if store.google_rating %}<div style="color:rgba(255,255,255,.75);font-size:.8rem;margin-top:5px">★ {{ store.google_rating }} on Google Maps</div>{% endif %}
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <a href="{{ url_for('cheer_staff', store_id=store.id) }}" class="btn btn-primary">♥ Send Appreciation</a>
+        {% if in_list %}
+        <form method="POST" action="{{ url_for('list_remove', item_id=in_list.id) }}" style="display:inline">
+          <button class="btn" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.4);color:white">★ Saved</button>
+        </form>
+        {% else %}
+        <button onclick="document.getElementById('list-modal').style.display='flex'" class="btn" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.4);color:white">☆ Save</button>
+        {% endif %}
+        {% if store.place_id %}
+        <a href="https://www.google.com/maps/place/?q=place_id:{{ store.place_id }}" target="_blank" class="btn" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.4);color:white;font-size:.78rem">🗺 Google Maps</a>
+        {% endif %}
+      </div>
     </div>
   </div>
-  {% if store.description %}<div class="card card-body" style="margin-bottom:20px"><p style="font-size:.9rem;color:var(--ink-light);line-height:1.7">{{ store.description }}</p></div>{% endif %}
+
+  <!-- Stats grid -->
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-val">{{ store.hiitap_rating() or '—' }}</div>
+      <div class="stat-lbl">♥ HiiTap Rating</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val">{{ store.cheer_count() }}</div>
+      <div class="stat-lbl">Total Cheers</div>
+    </div>
+    {% if store.google_rating %}
+    <div class="stat-box">
+      <div class="stat-val" style="color:#B8860B">{{ store.google_rating }}</div>
+      <div class="stat-lbl">★ Google Rating</div>
+    </div>
+    {% endif %}
+    <div class="stat-box">
+      <div class="stat-val">{{ store.staff|length }}</div>
+      <div class="stat-lbl">Staff Registered</div>
+    </div>
+  </div>
+
+  <!-- Google Maps embed -->
+  {% if maps_embed_url %}
+  <iframe src="{{ maps_embed_url }}" class="maps-embed" allowfullscreen loading="lazy"></iframe>
+  {% endif %}
+
+  <!-- Store info (phone / website / hours) -->
+  {% if store.phone or store.website or hours %}
+  <div class="card card-body" style="margin-bottom:16px">
+    <h3 style="font-weight:700;margin-bottom:12px">Store Info</h3>
+    {% if store.phone %}
+    <div style="font-size:.88rem;margin-bottom:8px">
+      📞 <a href="tel:{{ store.phone }}" style="color:var(--brand);text-decoration:none">{{ store.phone }}</a>
+    </div>
+    {% endif %}
+    {% if store.website %}
+    <div style="font-size:.88rem;margin-bottom:8px">
+      🌐 <a href="{{ store.website }}" target="_blank" style="color:var(--brand);text-decoration:none;word-break:break-all">{{ store.website }}</a>
+    </div>
+    {% endif %}
+    {% if hours %}
+    <div style="font-size:.83rem;font-weight:700;margin-top:10px;margin-bottom:6px">Opening Hours</div>
+    <ul class="hours-list">{% for h in hours %}<li>{{ h }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Staff -->
   {% if store.staff %}
-  <div class="section-header"><h2>スタッフ紹介</h2><p>スタッフをタップして感謝を送ろう</p></div>
+  <div class="section-header"><h2>Meet the team</h2><p>Tap to appreciate directly</p></div>
   <div class="staff-grid">
     {% for s in store.staff %}
     <a href="{{ url_for('cheer_staff', store_id=store.id) }}" class="staff-item">
       <img src="{{ s.photo_url }}" alt="{{ s.name }}">
       <div class="staff-item-info">
         <div class="staff-item-name">{{ s.name }}</div>
-        <div class="staff-item-pts">{{ s.total_points() }} ポイント獲得</div>
-        {% if s.avg_service_rating() > 0 %}<div style="color:var(--brand);font-size:.75rem">{{ '★' * s.avg_service_rating()|int }}</div>{% endif %}
+        <div class="staff-item-pts">{{ s.total_points() }} pts</div>
+        {% if s.avg_rating() > 0 %}<div style="color:var(--brand);font-size:.72rem">{{ '★' * s.avg_rating()|int }}</div>{% endif %}
       </div>
     </a>
     {% endfor %}
   </div>
+  {% else %}
+  <div class="card card-body" style="text-align:center;padding:28px;margin-top:16px">
+    <p style="color:var(--ink-light);font-size:.88rem">No staff registered yet.</p>
+    <a href="{{ url_for('cheer_staff', store_id=store.id) }}" class="btn btn-primary" style="margin-top:14px">♥ Appreciate the store</a>
+  </div>
   {% endif %}
-  <div class="qr-section">
-    <h3 style="font-weight:700;margin-bottom:12px;color:var(--brand)">📱 QRコード</h3>
-    <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR" style="width:140px;height:140px;border-radius:12px">
-    <p style="font-size:.8rem;color:var(--ink-light);margin-top:10px">スキャンしてこのお店のHiiTapページへ</p>
+
+  <!-- Recent cheers -->
+  {% if recent_cheers %}
+  <div class="section-header" style="margin-top:24px"><h2>Recent Appreciations</h2></div>
+  {% for cheer in recent_cheers %}
+  <div class="cheer-card">
+    <div class="cheer-header">
+      <div class="cheer-avatar" style="background:var(--brand-light);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;color:var(--brand)">{{ cheer.user.display_name[0].upper() }}</div>
+      <div class="cheer-meta">
+        <div class="cheer-name">{{ cheer.user.display_name }}</div>
+        <div class="cheer-sub">{{ cheer.created_at.strftime('%b %d, %Y') }}</div>
+        <div class="cheer-stars">{{ '★' * cheer.service_rating }}{{ '☆' * (5-cheer.service_rating) }}</div>
+      </div>
+    </div>
+    {% if cheer.good_points_list() %}<div class="cheer-tags">{% for pt in cheer.good_points_list() %}<span class="tag">{{ pt }}</span>{% endfor %}</div>{% endif %}
+    {% if cheer.comment %}<div style="margin-top:8px;font-size:.85rem;color:var(--ink-light);font-style:italic">"{{ cheer.comment }}"</div>{% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- QR -->
+  <div class="qr-box">
+    <h3 style="font-weight:700;margin-bottom:12px;color:var(--brand)">QR Code</h3>
+    <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR" style="width:130px;height:130px;border-radius:10px">
+    <p style="font-size:.78rem;color:var(--ink-light);margin-top:10px">Scan to open this store's HiiTap page</p>
   </div>
 </div>
+
+<!-- Save to list modal -->
 <div id="list-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center">
   <div style="background:white;border-radius:24px 24px 0 0;padding:28px 24px;width:100%;max-width:500px">
-    <h3 style="margin-bottom:16px">マイリストに保存</h3>
+    <h3 style="font-weight:700;margin-bottom:16px">Save to My List</h3>
     <form method="POST" action="{{ url_for('list_add', store_id=store.id) }}">
-      <div class="input-group"><label>タグ（カンマ区切り）</label><input type="text" name="tags" placeholder="例：デート、ランチ"></div>
-      <div class="input-group"><label>メモ</label><textarea name="memo" rows="2" placeholder="感想など…"></textarea></div>
+      <div class="input-group"><label>Tags (comma-separated)</label><input type="text" name="tags" placeholder="Date night, Brunch…"></div>
+      <div class="input-group"><label>Note (optional)</label><textarea name="memo" rows="2" placeholder="Your thoughts…"></textarea></div>
       <div style="display:flex;gap:10px">
-        <button type="button" onclick="document.getElementById('list-modal').style.display='none'" class="btn btn-ghost btn-full">キャンセル</button>
-        <button type="submit" class="btn btn-primary btn-full">保存</button>
+        <button type="button" onclick="document.getElementById('list-modal').style.display='none'" class="btn btn-ghost btn-full">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-full">Save</button>
       </div>
     </form>
   </div>
